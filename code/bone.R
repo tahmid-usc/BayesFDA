@@ -1,6 +1,5 @@
 rm(list=ls())
 
-
 source("code/functions.R")
 
 
@@ -44,9 +43,9 @@ legend('bottomright', c('Male', 'Female'), lty = 1, lwd = 2, bty = 'n',
 
 #choose kernel
 source("code/RBF.R")
-source("code/laplace.R")
-source("code/matern52.R")
-source("code/matern32.R")
+# source("code/laplace.R")
+# source("code/matern52.R")
+# source("code/matern32.R")
 
 
 
@@ -54,7 +53,7 @@ source("code/matern32.R")
 gpFit.male <- feature(id = train$mal$idnum, x = train$mal$age, y = train$mal$spnbmd)
 gpFit.female <- feature(id = train$fem$idnum, x = train$fem$age, y = train$fem$spnbmd)
 
-#save(list = c('gpFit.male', 'gpFit.female'), file = './data/bone/m32.Rdata')
+#save(list = c('gpFit.male', 'gpFit.female'), file = './data/bone/rbf.Rdata')
 
 testTime <- seq(min(bone$age), max(bone$age), length.out = 100)
 
@@ -68,7 +67,7 @@ plot(1, type="n", xlab = 'Age (Years)', ylab = 'Spinal Bone Mineral Density',
      ylim = c(min(bone$spnbmd), max(bone$spnbmd)),
      cex.main = 1.5, cex.lab = 1.5)
 for(i in bone$idnum){
-  Cr <- ifelse(bone[bone$idnum == i,4] == 'mal', 1, 0)
+  Cr <- ifelse(bone[bone$idnum == i,4] == 'mal', .5, .1)
   x <- as.numeric(bone[bone$idnum == i,3])
   y <- as.numeric(bone[bone$idnum == i,5])
   lines(x, y, type = 'b', 
@@ -87,6 +86,59 @@ legend('bottomright', c('Male', 'Female'), lty = 1, lwd = 2, bty = 'n',
        col = c(rgb(1, 0, 0, 1),col = rgb(0, 0, 0, 1)))
 
 
+#subject specific
+
+sub_mu <- postDist_sub(testTime, gpFit.male, sub_id = 1)  
+
+
+#plot
+par(cex.main = 1.5, cex.lab=1.5, cex.axis=1.5, oma = c(1,1,1,1), mar = c(6,6,3,3)) 
+
+#----
+plotBone <- function() {
+plot(bone$age, bone$spnbmd, type="n", xlab = 'Age (Years)', 
+     ylab = 'Spinal Bone Mineral Density')
+
+for(i in bone$idnum){
+  Cr <- ifelse(bone[bone$idnum == i,4] == 'mal', 1, 0)
+  x <- as.numeric(bone[bone$idnum == i,3])
+  y <- as.numeric(bone[bone$idnum == i,5])
+  lines(x, y, type = 'b', 
+        lwd = 1, col = rgb(Cr, 0, 0, .05))
+}
+}
+
+
+
+unique(train$fem$idnum)
+unique(train$mal$idnum)
+
+
+sub_mu <- postDist_sub(testTime, gpFit.male, sub_id = 1)  
+plotBone()
+lines(testTime, sub_mu$mu, lwd = 4, col = 2)
+lines(as.numeric(bone[bone$idnum == 1,3]), as.numeric(bone[bone$idnum == 1,5]), 
+      lwd = 4, col = 2, type = 'b')
+sub_mu <- postDist_sub(testTime, gpFit.female, sub_id = 4) 
+lines(testTime, sub_mu$mu, lwd = 4, col = 1)
+lines(as.numeric(bone[bone$idnum == 4,3]), as.numeric(bone[bone$idnum == 4,5]), 
+      lwd = 4, col = 1, type = 'b')
+legend('bottomright', c('Male', 'Female'), lty = 1, lwd = 2, bty = 'n', 
+       col = c(rgb(1, 0, 0, 1),col = rgb(0, 0, 0, 1)))
+
+
+
+sub_mu <- postDist_sub(testTime, gpFit.male, sub_id = 2)
+plotBone()
+lines(testTime, sub_mu$mu, lwd = 4, col = 2)
+lines(as.numeric(bone[bone$idnum == 2,3]), as.numeric(bone[bone$idnum == 2,5]), 
+      lwd = 4, col = 2, type = 'b')
+sub_mu <- postDist_sub(testTime, gpFit.female, sub_id = 5)
+lines(testTime, sub_mu$mu, lwd = 4, col = 1)
+lines(as.numeric(bone[bone$idnum == 5,3]), as.numeric(bone[bone$idnum == 5,5]), 
+      lwd = 4, col = 1, type = 'b')
+legend('bottomright', c('Male', 'Female'), lty = 1, lwd = 2, bty = 'n', 
+       col = c(rgb(1, 0, 0, 1),col = rgb(0, 0, 0, 1)))
 
 
 

@@ -6,7 +6,7 @@ library(Matrix)
 library(optimx)
 library(readxl)
 library(tidyverse)
-
+library(smoothmest)
 
 # Extract relevant feature of the data
 
@@ -180,7 +180,7 @@ muf2 <- function(x) {
 
 fdagen <- function(n = 10, gridSize = 100, sparsity = .5, muf, theta = rep(1,3)) {
   
-  source("code/RBF.R")
+  source("../code/RBF.R")
   # n = number of functions in the sample data
   
   grid <- seq(0, 1, length.out = gridSize)

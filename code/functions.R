@@ -93,7 +93,20 @@ postDist <- function(x, train) {
   
 }
 
+postMu <- function(x, train) {
+  
+  n <- length(x)
+  x <- x/train$xmax
+  kx <-  testcov(x = x, y = train$trainx, theta = train$hyper[1:4])
+  #kinv <-  chol2inv(chol(kxx + trainlist$hyper[5] * diag(trainlist$N)))
+  k <- kx %*% train$kinv
+  pred <- k %*% as.matrix(train$trainy)
 
+  pred <-  train$ymean + train$ysd * pred
+  
+  return(pred)
+  
+}
 
 
 postDist_sub <- function(x, train, sub_id) {
@@ -146,6 +159,18 @@ fpcamu <- function(t, fpca) {
 }
 
 
+
+# SME mean function
+
+sme_mu <- function(t, fit_sme) {
+
+  sme_mu <- spline(x = as.numeric(colnames(fit_sme$coefficients)), 
+                   y = fit_sme$coefficients[1,], xout = t, method = "natural")
+  
+  return(sme_mu$y)
+}
+
+
 #-----------------------------------
 
 # Simulation functions-----------------------
@@ -178,6 +203,31 @@ muf2 <- function(x) {
 
 
 
+# Generate truly sparse data directly
+
+fdagen_fs <- function(n = 10, mint = 2, maxt = 20, muf, theta = rep(1,3)) {
+  
+  train <- data.frame()
+  #n number of functions in the sample data
+  n.time <- sample(mint:maxt, size=n, replace=T) 
+  
+  for(i in 1:n) {
+    id <- rep(i, n.time[i])
+    t <- sort(runif(n.time[i], 0 , 1))
+    mu <- muf(t)
+    gt <- mvrnorm(1, rep(0, n.time[i]), ker(t, l = theta[1], sigf = theta[2])) 
+    #y <- mu + gt
+    y <- mu + gt + rnorm(n.time[i], 0, theta[3])
+    train <- rbind(train, cbind(t, y, id))
+  }
+  return(train)
+}
+
+
+
+
+
+# Generate data by sparsifying
 fdagen <- function(n = 10, gridSize = 100, sparsity = .5, muf, theta = rep(1,3)) {
   
   source("code/RBF.R")
@@ -261,6 +311,22 @@ gpsmooth_sub <-  function(x, trainlist, sub_id) {
   pred <-  trainlist$ymean + trainlist$ysd * pred
   return(pred)
   
+}
+
+
+
+
+## MISE ---------------------------
+
+residfunc <- function(true, est) {
+  mean((true - est)^2)
+}
+
+
+ase <- function(n, method, muf, est, est_arg) {
+  if(method == 'mc') time <- runif(n, 0, 1) else time <- seq(0, 1, length.out = n)
+  ase <-  mean((residfunc(time, muf, est, est_arg)))
+  return(ase)
 }
 
 

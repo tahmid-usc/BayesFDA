@@ -1,0 +1,87 @@
+---
+title: "Analyzing Sparse Functional Data with SME package"
+author: "Tahmidul Islam"
+date: "9/5/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, error=FALSE, message = FALSE, cache = TRUE, dpi = 300, fig.width = 14, fig.height = 6)
+```
+
+
+# Data
+
+Sample size is 20. For sparse functional data setting, each subject is observed on possibly different time points for varying number of times.
+
+## Fully Sparse (fdata1)
+
+Here, the time points are chosen randomly from a uniform distribution. First, for a given subject, $n_i$, the number of time points to be observed on is selected randomly from integers 2 to 10. Then, $n_i$ time points $t_{ij}$s are selected from a uniform(0,1). Here, the chance of replication at the same time point is low.
+
+## Artificially Sparsified from Regular Grid (fdata2)
+
+In this case, a grid of 100 equally spaced time points is created. A Bernoulli random variable is generated with probability 0.10 for each of the time points for its inclusion in the dataset. Here, the chance of replication at the same time point is greater.
+
+```{r}
+fdata1 <- read.table('fdata1.txt', header = T) #Fully sparse
+fdata2 <- read.table('fdata2.txt', header = T) #Sparsified
+```
+
+
+```{r}
+head(fdata1)
+head(fdata2)
+```
+
+
+Function to display functional data
+
+```{r}
+# plot functional data
+plotFdata <- function(id, x, y) {
+  plot(x, y, type='n', xlab ="Time", ylab="y")
+  for(i in unique(id)){
+    lines(x[id == i], y[id == i], col = 'grey', type = 'b', lwd = 2)
+  }
+  
+}
+```
+
+```{r}
+plotFdata(fdata1$id, fdata1$t, fdata1$y)
+plotFdata(fdata2$id, fdata2$t, fdata2$y)
+```
+
+# SME package
+
+```{r}
+#install.packages("https://cran.r-project.org/src/contrib/Archive/sme/sme_1.0.2.tar.gz")
+library(sme)
+```
+
+
+```{r}
+fit1 <- sme(data.frame(tme = fdata1$t, ind = as.factor(fdata1$id), y = fdata1$y), 
+        criteria = 'AIC', maxIter = 10000, verbose = T)
+
+fit2 <- sme(data.frame(tme = fdata2$t, ind = as.factor(fdata2$id), y = fdata2$y), 
+        criteria = 'AIC', maxIter = 10000, verbose = T)
+```
+
+```{r}
+plot(fit1)
+plot(fit2)
+```
+
+## Suggested change
+
+```{r}
+fit1 <- sme(data.frame(tme = fdata1$t, ind = as.factor(fdata1$id), y = fdata1$y), lambda.mu=1e-6, lambda.v=1, knots=seq(0.05, 0.95, by=0.05))
+
+fit2 <- sme(data.frame(tme = fdata2$t, ind = as.factor(fdata2$id), y = fdata2$y), lambda.mu=1e-6, lambda.v=1, knots=seq(0.05, 0.95, by=0.05))
+```
+
+```{r}
+plot(fit1)
+plot(fit2)
+```

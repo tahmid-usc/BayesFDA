@@ -226,6 +226,29 @@ fdagen <- function(n = 10, gridSize = 100, sparsity = .5, muf, theta = rep(1,3))
 }
 
 
+
+# Generate truly sparse data directly
+
+fdagen_fs <- function(n = 10, mint = 2, maxt = 20, muf, theta = rep(1,3)) {
+  
+  train <- data.frame()
+  #n number of functions in the sample data
+  n.time <- sample(mint:maxt, size=n, replace=T) 
+  
+  for(i in 1:n) {
+    id <- rep(i, n.time[i])
+    t <- sort(runif(n.time[i], 0 , 1))
+    mu <- muf(t)
+    gt <- mvrnorm(1, rep(0, n.time[i]), ker(t, l = theta[1], sigf = theta[2])) 
+    #y <- mu + gt
+    y <- mu + gt + rnorm(n.time[i], 0, theta[3])
+    train <- rbind(train, cbind(t, y, id))
+  }
+  return(train)
+}
+
+
+
 # plot functional data
 plotFdata <- function(id, x, y) {
   plot(x, y, type='n', xlab ="Time", ylab="y")

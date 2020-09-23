@@ -20,18 +20,20 @@ source("../code/RBF.R")
 #source("code/laplace.R")
 #source("code/matern52.R")
 #source("code/matern32.R")
-
-
-# data
-
-# fdata_full <- fdagen(n = 20, gridSize = 60, sparsity = .1, muf = muf1)
-# fdata1 <- fdata_full$sparseData
-load('savedResusltComapre.Rdata')
-
-testTime <- seq(0, 1, length.out = 100)
 ```
 
+
+
 ```{r}
+fdata_full <- fdagen(n = 20, gridSize = 60, sparsity = .1, muf = muf1)
+#fdata1 <- fdagen_fs(n = 20, mint = 2, maxt = 20, muf = muf1, theta = c(1,1,1))
+fdata1 <- fdata_full$sparseData
+#load('savedResusltComapre.Rdata')
+```
+
+
+```{r}
+testTime <- seq(0, 1, length.out = 100)
 plotFdata(fdata1$id, fdata1$t, fdata1$y)
 ```
 
@@ -39,7 +41,7 @@ plotFdata(fdata1$id, fdata1$t, fdata1$y)
 
 ```{r, results = FALSE}
 # Fit the GP model
-#gpFit1 <- feature(id = fdata1$id, x = fdata1$t, y = fdata1$y)
+gpFit1 <- feature(id = fdata1$id, x = fdata1$t, y = fdata1$y)
 postDist1 <- postDist(testTime, gpFit1)
 ```
 

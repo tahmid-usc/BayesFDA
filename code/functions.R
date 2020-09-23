@@ -162,10 +162,10 @@ fpcamu <- function(t, fpca) {
 
 # SME mean function
 
-sme_mu <- function(t, fit_sme) {
+sme_mu <- function(testTime, fit_sme) {
 
-  sme_mu <- spline(x = as.numeric(colnames(fit_sme$coefficients)), 
-                   y = fit_sme$coefficients[1,], xout = t, method = "natural")
+  sme_mu <- spline(x = as.numeric(colnames(fit_sme$coefficients)), y = fit_sme$coefficients[1,], 
+                   xout = testTime, method = "natural")
   
   return(sme_mu$y)
 }
@@ -277,8 +277,9 @@ fdagen <- function(n = 10, gridSize = 100, sparsity = .5, muf, theta = rep(1,3))
 
 
 # plot functional data
-plotFdata <- function(id, x, y) {
-  plot(x, y, type='n', xlab ="Time", ylab="y")
+plotFdata <- function(id, x, y,...) {
+  plot(x, y, type='n', xlab ="Time", ylab="y", ylim = c((min(y) - 1.1 * sd(y)), (max(y) + 
+      1.1 * sd(y))), cex.lab = 1.2,...)
   for(i in unique(id)){
     lines(x[id == i], y[id == i], col = 'grey', type = 'b', lwd = 2)
   }

@@ -22,6 +22,11 @@ source('code/functions.R')
 #source('code/matern32.R')
 
 
+# check hyperparameter value
+
+fdata <- fdagen(n = 20, gridSize = 100, sparsity = 1, muf = muf1, theta = c(1,1,1))
+matplot(fdata$grid, t(fdata$subData), type = 'l')
+
 
 #----
 
@@ -33,7 +38,10 @@ mint = 2
 maxt = 10
 
 source('code/RBF.R')
-fdata1 <- fdagen_fs(n = sampleSize, mint= mint, maxt = maxt, muf = muf1, theta = c(1, 5, 2))
+#fdata1 <- fdagen_fs(n = sampleSize, mint= mint, maxt = maxt, muf = muf2, theta = c(1, 1, 1))
+
+fdata1 <- fdagen(n = 20, gridSize = 100, sparsity = .1, muf = muf2, theta = c(1,1,1))
+fdata1 <- fdata1$sparseData
 
 
 #plot
@@ -45,29 +53,26 @@ plotFdata(fdata1$id, fdata1$t, fdata1$y)
 
 testTime <- seq(0, 1, length.out = 100)
 
-#Gaussian kernel
+#Gaussian kernel & posterior distribution
 source('code/RBF.R')
 fet.muf1.rbf <- feature(fdata1$id, fdata1$t, fdata1$y)
-
+pd_muf1_rbf <- postMu(testTime, fet.muf1.rbf)
 
 source('code/laplace.R')
 
 fet.muf1.lap <- feature(fdata1$id, fdata1$t, fdata1$y)
+pd_muf1_lap <- postMu(testTime, fet.muf1.lap)
 
 source('code/matern52.R')
 
 fet.muf1.m52 <- feature(fdata1$id, fdata1$t, fdata1$y)
+pd_muf1_m52 <- postMu(testTime, fet.muf1.m52)
 
 source('code/matern32.R')
 
 fet.muf1.m32 <- feature(fdata1$id, fdata1$t, fdata1$y)
-
-# posterior distribution
-
-pd_muf1_rbf <- postMu(testTime, fet.muf1.rbf)
-pd_muf1_lap <- postMu(testTime, fet.muf1.lap)
-pd_muf1_m52 <- postMu(testTime, fet.muf1.m52)
 pd_muf1_m32 <- postMu(testTime, fet.muf1.m32)
+
 
 
 
@@ -85,7 +90,7 @@ pace_mu1 <- fpcamu(testTime, fpca1)
 # SME
 
 sme1 <- sme(data.frame(tme = fdata1$t, ind = as.factor(fdata1$id), y = fdata1$y), 
-               criteria = 'AIC', maxIter = 10000, initial.lambda.mu = 0, initial.lambda.v = 0)
+        criteria = 'AIC', maxIter = 10000, initial.lambda.mu = 0, initial.lambda.v = 0)
 sme_mu1 <- sme_mu(testTime, sme1)
 
 

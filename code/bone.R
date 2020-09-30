@@ -67,23 +67,19 @@ plot(1, type="n", xlab = 'Age (Years)', ylab = 'Spinal Bone Mineral Density',
      ylim = c(min(bone$spnbmd), max(bone$spnbmd)),
      cex.main = 1.5, cex.lab = 1.5)
 for(i in bone$idnum){
-  Cr <- ifelse(bone[bone$idnum == i,4] == 'mal', .5, .1)
+  Cr <- ifelse(bone[bone$idnum == i,4] == 'mal', 1, 0)
   x <- as.numeric(bone[bone$idnum == i,3])
   y <- as.numeric(bone[bone$idnum == i,5])
-  lines(x, y, type = 'b', 
-        lwd = 1, col = rgb(Cr, 0, 0, .1))
+  lines(x, y, type = 'b', cex = .5, lwd = .1, col = rgb(Cr, 0, 0 ,0.1))
 }
-lines(testTime, postDist.male$mu, lwd = 4, col = 2)
-lines(testTime, postDist.female$mu, lwd = 4, col = 1)
-
-lines(testTime, postDist.male$ul, lwd = 3, lty = 2, col = 2)
-lines(testTime, postDist.male$ll, lwd = 3, lty = 2, col = 2)
-
-lines(testTime, postDist.female$ul, lwd = 3, lty = 2, col = 1)
-lines(testTime, postDist.female$ll, lwd = 3, lty = 2, col = 1)
-
-legend('bottomright', c('Male', 'Female'), lty = 1, lwd = 2, bty = 'n', 
-       col = c(rgb(1, 0, 0, 1),col = rgb(0, 0, 0, 1)))
+polygon(c(testTime,rev(testTime)), c(postDist.male$ll,rev(postDist.male$ul)), 
+        col= rgb(1,0,0,.2),border=NA)
+polygon(c(testTime,rev(testTime)), c(postDist.female$ll,rev(postDist.female$ul)), 
+        col= rgb(0,0,0,.2),border=NA)
+lines(testTime, postDist.male$mu, lwd = 4, col= rgb(1,0,0,1))
+lines(testTime, postDist.female$mu, lwd = 4, col= rgb(0,0,0,1))
+legend('bottomright', c('Male', 'Female'), lty = 1, lwd = 3, bty = 'n', 
+       col = c(2,1))
 
 
 #subject specific

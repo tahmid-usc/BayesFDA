@@ -1,3 +1,13 @@
+library(readr)
+library(MASS)
+library(kernlab)
+library(mvtnorm)
+library(Matrix)
+library(optimx)
+library(readxl)
+library(tidyverse)
+
+
 # Extract relevant feature of the data
 
 feature <- function(train) {

@@ -1,9 +1,9 @@
 source("./code/functions_regular.R")
 
 source("./code/rbf_regular.R")
-source("./code/laplace_regular.R")
-source("./code/matern52_regular.R")
-source("./code/matern32_regular.R")
+# source("./code/laplace_regular.R")
+# source("./code/matern52_regular.R")
+# source("./code/matern32_regular.R")
 
 
 
@@ -41,12 +41,15 @@ postDist.g1 <- postDist(y, gpFit.g1)
 
 y <- seq(0,119, length.out = 100)
 
+
+#plot
 plot(x, G1[1,], type = 'b', ylim = c(min(G1), max(G1)), col = rgb(0,0,0,.1), cex = .5,
      xlab = 'Time (mins)', ylab = 'Expression', cex.lab = 1.5)
 apply(G1, 1, function(y) {lines(x, y, type = 'b', col = rgb(0,0,0,.1), cex = .5)})
-lines(y, postDist.g1$mu, lwd = 4)
-lines(y, postDist.g1$ul, lwd = 2, lty = 2)
-lines(y, postDist.g1$ll, lwd = 2, lty = 2)
+lines(y, postDist.g1$mu, lwd = 4, col = 2)
+# lines(y, postDist.g1$ul, lwd = 4, lty = 2, col = 2)
+# lines(y, postDist.g1$ll, lwd = 4, lty = 2, col = 2)
+polygon(c(y,rev(y)), c(postDist.g1$ll,rev(postDist.g1$ul)), col= rgb(1,0,0,.2),border=NA)
 
 
 
@@ -59,12 +62,16 @@ postDist.nong1 <- postDist(y, gpFit.nong1)
 
 y <- seq(0,119, length.out = 100)
 
+
+#plot
 plot(x, nonG1[1,], type = 'b', ylim = c(min(nonG1), max(nonG1)), col = rgb(0,0,0,.1), 
      cex = .5, xlab = 'Time (mins)', ylab = 'Expression', cex.lab = 1.5)
 apply(nonG1, 1, function(y) {lines(x, y, type = 'b', col = rgb(0,0,0,.1), cex = .5)})
-lines(y, postDist.nong1$mu, lwd = 4)
-lines(y, postDist.nong1$ul, lwd = 2, lty = 2)
-lines(y, postDist.nong1$ll, lwd = 2, lty = 2)
+lines(y, postDist.nong1$mu, lwd = 4, col = 2)
+# lines(y, postDist.nong1$ul, lwd = 2, lty = 2)
+# lines(y, postDist.nong1$ll, lwd = 2, lty = 2)
+polygon(c(y,rev(y)), c(postDist.nong1$ll,rev(postDist.nong1$ul)), col= rgb(1,0,0,.2),border=NA)
+
 
 
 #save(list = c('gpFit.g1', 'gpFit.nong1'), file = './data/gene/m32.Rdata')

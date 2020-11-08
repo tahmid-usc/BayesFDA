@@ -1,0 +1,100 @@
+---
+title: "Tree Data Analysis"
+author: "Tahmidul Islam"
+date: "9/5/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, error=FALSE, message = FALSE, cache = TRUE, dpi = 300, fig.width = 14, fig.height = 6)
+```
+
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(kableExtra)
+library(tidyr)
+```
+# Tree Data
+
+This dataset contains features of trees (height, width, etc.) from 3 sites: Brighton, Chase Stream and Lily Bay. There are 8 species in this sample.
+
+Table: Data overview.
+```{r}
+tree <- read.csv("E:/R Project/BayesFDA/data/tree/tree.csv")
+tree <- tree %>% dplyr::select(Site, Tree, Rep, Sp, Year, Height) %>% filter(!is.na(Height)) %>% 
+mutate(id = paste0(Tree, Rep))
+head(tree) %>% kable()
+```
+
+
+Table: Distribution of site and species.
+```{r}
+sumDf <- tree %>% group_by(Site, Sp, id) %>% summarize (n = n()) %>% dplyr::select(Site, Sp)
+
+sumDf %>% tally() %>% spread(Sp, n) %>% kable()
+```
+
+```{r}
+ggplot(sumDf, aes(x = Site, fill = Sp)) + geom_bar(position="dodge", stat="count")
+```
+
+The measurements are collected few years apart: at 5, 10, 15, 16 and 27 years. 
+```{r}
+sumDf <- tree %>% group_by(Site, Year)  %>%  summarize(n = n())
+sumDf %>% kable()
+```
+```{r}
+ggplot(sumDf, aes(x = factor(Year), fill = Site)) + geom_bar(position = 'dodge', stat = 'count')
+```
+
+There is height measurement for years after 10 in Brighton and year after 15 in Lily Bay. 
+
+```{r}
+ggplot(data = tree, aes(x = Year, y = Height, col = Sp, group = id)) +
+  geom_line(size = 1.5) + facet_wrap(~Site)
+```
+```{r}
+ggplot(data = tree, aes(x = Year, y = Height, col = Sp, group = id)) +
+  geom_line(size = 1.5)
+```
+
+
+## GP Model for Tree Height
+
+Assuming the tree heights for each of the species as a function over time, we analyze the data in functional data analysis approach. For each species, we combine data from all three sites and model the mean functions of the tree heights. We have combined the variables `Tree` and `Rep` to create an `id` variable. Gaussian kernel has been for the estimation.
+
+```{r bs, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species: BS', out.width='\\linewidth', fig.pos='h'}
+knitr::include_graphics("../plot/tree/BS.pdf")
+```
+
+
+```{r el, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : EL', out.width='\\linewidth', fig.pos='H'}
+knitr::include_graphics("../plot/tree/EL.pdf")
+```
+
+```{r hl, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : HL', out.width='\\linewidth', fig.pos='H'}
+knitr::include_graphics("../plot/tree/HL.pdf")
+```
+
+```{r jl, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : JL', out.width='\\linewidth', fig.pos='H'}
+knitr::include_graphics("../plot/tree/JL.pdf")
+```
+
+```{r jp, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : JP', out.width='\\linewidth', fig.pos='H'}
+knitr::include_graphics("../plot/tree/JP.pdf")
+```
+
+```{r rp, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : RP', out.width='\\linewidth', fig.pos='H'}
+knitr::include_graphics("../plot/tree/RP.pdf")
+```
+
+```{r tl, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : TL', out.width='\\linewidth', fig.pos='H'}
+knitr::include_graphics("../plot/tree/TL.pdf")
+```
+
+```{r ws, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : WS', out.width='\\linewidth', fig.pos='H'}
+knitr::include_graphics("../plot/tree/WS.pdf")
+```

@@ -71,6 +71,7 @@ Hyper.ms <- function(x, y, repnum, N) {
 postDist <- function(x, train) {
   
   n <- length(x)
+  xstar <- x
   x <- x/train$xmax
   kxx <- covmat(trainx = train$trainx, repnum = train$rep, 
                 theta = train$hyper[1:4])
@@ -89,7 +90,7 @@ postDist <- function(x, train) {
   ul <- train$ymean + train$ysd * ul
   ll <- train$ymean + train$ysd * ll
   
-  return(list(mu = pred, sigma = sigma, ul = ul, ll = ll))
+  return(list(mu = pred, sigma = sigma, ul = ul, ll = ll, xstar = xstar))
   
 }
 
@@ -277,15 +278,26 @@ fdagen <- function(n = 10, gridSize = 100, sparsity = .5, muf, theta = rep(1,3))
 
 
 # plot functional data
-plotFdata <- function(id, x, y,...) {
+plotFdata <- function(id, x, y, trans = .5, ...) {
   plot(x, y, type='n', xlab ="Time", ylab="y", ylim = c((min(y) - 1.1 * sd(y)), (max(y) + 
       1.1 * sd(y))), cex.lab = 1.2,...)
   for(i in unique(id)){
-    lines(x[id == i], y[id == i], col = 'grey', type = 'b', lwd = 2)
+    lines(x[id == i], y[id == i], col = rgb(0, 0, 0, trans), type = 'b', lwd = 4)
   }
   
 }
 
+
+# plot fitted mean function
+
+plotGP <- function(gp, postDist, ...) {
+  x <- gp$trainx * gp$xmax
+  y <- gp$ymean + (gp$ysd * gp$trainy)
+  plotFdata(gp$id, x, y, ...)
+  polygon(c(postDist$xstar,rev(postDist$xstar)), c(postDist$ll,rev(postDist$ul)), 
+          col= rgb(.2,0,0,.5),border=NA)
+  lines(postDist$xstar, postDist$mu, lwd = 4, col = 2)
+}
 
 # subject specific prediction
 

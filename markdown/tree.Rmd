@@ -98,3 +98,34 @@ knitr::include_graphics("../plot/tree/TL.pdf")
 ```{r ws, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : WS', out.width='\\linewidth', fig.pos='H'}
 knitr::include_graphics("../plot/tree/WS.pdf")
 ```
+
+## Site Specific Mean Height Estimation
+
+We attempt to estimate the mean function for each of the species by the sites. The black curve denotes the overall mean function where the red, green and blue curves represent the site specific mean functions for the sites Brighton, Chase Stream and Lili Bay respectively. 
+We observe some features in the tree data as well as some issues with the model fit. For example, we have found no site specific variation for the species BS, all the site specific curves coincide with the overall mean curve. It suggest there is no site specific effect for the species BS.
+
+```{r bssite, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species: BS', out.width='\\linewidth', fig.pos='H'}
+knitr::include_graphics("../plot/tree/bs_site.pdf")
+knitr::include_graphics("../plot/tree/rp_site.pdf")
+knitr::include_graphics("../plot/tree/ws_site.pdf")
+```
+
+For EL and HL, we observev a nice separation of the site effects.
+```{r elhl, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species: EL', out.width='\\linewidth', fig.pos='H'}
+knitr::include_graphics("../plot/tree/el_site.pdf")
+knitr::include_graphics("../plot/tree/hl_site.pdf")
+```
+
+
+For species JL and TL, it appears that the overall model fit was not right in the first place. I am rerunning the optimization and model fit to check it.
+```{r jltl, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species: JL', out.width='\\linewidth', fig.pos='H'}
+knitr::include_graphics("../plot/tree/jl_site.pdf")
+knitr::include_graphics("../plot/tree/tl_site.pdf")
+```
+
+Also for JP, it appears that there are some issues with site specific fit for Brighton and Chase Stream.
+```{r jpsite, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species: JP', out.width='\\linewidth', fig.pos='H'}
+knitr::include_graphics("../plot/tree/jp_site.pdf")
+```
+
+

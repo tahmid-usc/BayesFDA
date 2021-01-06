@@ -199,8 +199,9 @@ postDist_site <- function(x, train, site) {
 #----------------
 
 tree <- read.csv("E:/R Project/BayesFDA/data/tree/tree.csv")
-tree <- tree %>% dplyr::select(Site, Tree, Rep, Sp, Year, Height) %>% filter(!is.na(Height)) %>% 
-  mutate(id = paste0(Tree, Rep), logHeight = log(Height)) %>% arrange(Site, id)
+tree <- tree %>% dplyr::select(Site, ID.Code, Tree, Rep, Sp, Year, Height) %>% 
+  filter(!is.na(Height)) %>% 
+  mutate(id = paste0(Site, ID.Code, Rep, Tree), logHeight = log(Height))
 splitData <- split(tree, tree$Sp)
 
 
@@ -210,7 +211,10 @@ gp_Sp <- lapply(splitData, function(L) {feature(id = L$id,site = L$Site, x = L$Y
 
 postDist_Sp <- lapply(gp_Sp, function(L){postDist(testTime, L)})
 
-
+estHyper <- lapply(gp_Sp, function(L){L$hyper})
+estHyper <-t(sapply(estHyper,c))
+estHyper <- round(estHyper, 3)
+xtable(estHyper)
 
 plotGP(gp_Sp$BS, postDist_Sp$BS, trans = .05)
 plotGP(gp_Sp$EL, postDist_Sp$EL, trans = .05)
@@ -221,7 +225,8 @@ plotGP(gp_Sp$RP, postDist_Sp$RP, trans = .05)
 plotGP(gp_Sp$TL, postDist_Sp$TL, trans = .05)
 plotGP(gp_Sp$WS, postDist_Sp$WS, trans = .05)
 
-
+library(xtable)
+t(sapply(gp_Sp, function(l) {l$hyper})) %>% xtable()
 
 #------------- Site specific for all sites
 
@@ -238,7 +243,8 @@ df_liBa <- data.frame(t = testTime, mu = pred_liBa$mu, ll= pred_liBa$ll, ul = pr
 
 tree %>% filter(Sp == 'BS') %>% 
   ggplot() + ggtitle('BS') +
-  geom_line(aes(x = Year, y = Height, color = Site, group = id)) +
+  geom_line(aes(x = Year, y = Height, color = Site, group = id), size = 1.5, 
+            alpha = .2) +
   geom_line(data = df_bri, aes(x = t, y = mu), size = 1.5, col = 'red') +
 #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .5) +
   geom_line(data = df_chSt, aes(x = t, y = mu), size = 1.5, col = 'green') +
@@ -261,14 +267,14 @@ df_liBa <- data.frame(t = testTime, mu = pred_liBa$mu, ll= pred_liBa$ll, ul = pr
 
 tree %>% filter(Sp == 'EL') %>% 
   ggplot() +  ggtitle('EL') +
-  geom_line(aes(x = Year, y = Height, color = Site, group = id)) +
+  geom_line(aes(x = Year, y = Height, color = Site, group = id), size = 1.5, alpha = .2) +
   geom_line(data = df_bri, aes(x = t, y = mu), size = 1.5, col = 'red') +
-  #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .5) +
+  #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .2) +
   geom_line(data = df_chSt, aes(x = t, y = mu), size = 1.5, col = 'green') +
-  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)
   geom_line(data = df_liBa, aes(x = t, y = mu), size = 1.5, col = 'blue') +
   geom_line(data = df, aes(x = t, y = mu), size = 1.5, col = 'black')
-#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)
 
 #------------
 
@@ -284,17 +290,21 @@ df_liBa <- data.frame(t = testTime, mu = pred_liBa$mu, ll= pred_liBa$ll, ul = pr
 
 tree %>% filter(Sp == 'HL') %>% 
   ggplot() + ggtitle('HL') +
-  geom_line(aes(x = Year, y = Height, color = Site, group = id)) +
+  geom_line(aes(x = Year, y = Height, color = Site, group = id), size = 1.5, alpha = .2) +
   geom_line(data = df_bri, aes(x = t, y = mu), size = 1.5, col = 'red') +
-  #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .5) +
+  #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .2) +
   geom_line(data = df_chSt, aes(x = t, y = mu), size = 1.5, col = 'green') +
-  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)
   geom_line(data = df_liBa, aes(x = t, y = mu), size = 1.5, col = 'blue') +
   geom_line(data = df, aes(x = t, y = mu), size = 1.5, col = 'black')
-#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)
 
 #------------
-
+# 
+# testTime <- seq(0, 30, length.out = 100)
+# gp_Sp$JL <- feature(id = splitData$JL$id,site = splitData$JL$Site, x = splitData$JL$Year, y = splitData$JL$Height)
+# 
+# postDist_Sp <- lapply(gp_Sp, function(L){postDist(testTime, L)})
 
 pred_bri <- postDist_site(x = testTime, train = gp_Sp$JL, site = "Brighton")
 pred_chSt <- postDist_site(x = testTime, train = gp_Sp$JL, site = "Chase Stream")
@@ -308,14 +318,14 @@ df_liBa <- data.frame(t = testTime, mu = pred_liBa$mu, ll= pred_liBa$ll, ul = pr
 
 tree %>% filter(Sp == 'JL') %>% 
   ggplot() + ggtitle('JL') +
-  geom_line(aes(x = Year, y = Height, color = Site, group = id)) +
+  geom_line(aes(x = Year, y = Height, color = Site, group = id), size = 1.5, alpha = .2, alpha = .2, size = 1.5) +
   geom_line(data = df_bri, aes(x = t, y = mu), size = 1.5, col = 'red') +
-  #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .5) +
+  #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .2) +
   geom_line(data = df_chSt, aes(x = t, y = mu), size = 1.5, col = 'green') +
-  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)
   geom_line(data = df_liBa, aes(x = t, y = mu), size = 1.5, col = 'blue') +
   geom_line(data = df, aes(x = t, y = mu), size = 1.5, col = 'black')
-#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)
 
 
 #------------
@@ -333,14 +343,14 @@ df_liBa <- data.frame(t = testTime, mu = pred_liBa$mu, ll= pred_liBa$ll, ul = pr
 
 tree %>% filter(Sp == 'JP') %>% 
   ggplot() + ggtitle('JP') +
-  geom_line(aes(x = Year, y = Height, color = Site, group = id)) +
+  geom_line(aes(x = Year, y = Height, color = Site, group = id), size = 1.5, alpha = .2) +
   geom_line(data = df_bri, aes(x = t, y = mu), size = 1.5, col = 'red') +
-  #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .5) +
+  #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .2) +
   geom_line(data = df_chSt, aes(x = t, y = mu), size = 1.5, col = 'green') +
-  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)
   geom_line(data = df_liBa, aes(x = t, y = mu), size = 1.5, col = 'blue') +
   geom_line(data = df, aes(x = t, y = mu), size = 1.5, col = 'black')
-#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)
 
 #------------
 
@@ -356,14 +366,14 @@ df_liBa <- data.frame(t = testTime, mu = pred_liBa$mu, ll= pred_liBa$ll, ul = pr
 
 tree %>% filter(Sp == 'RP') %>% 
   ggplot() + ggtitle('RP') +
-  geom_line(aes(x = Year, y = Height, color = Site, group = id)) +
+  geom_line(aes(x = Year, y = Height, color = Site, group = id), size = 1.5, alpha = .2) +
   geom_line(data = df_bri, aes(x = t, y = mu), size = 1.5, col = 'red') +
-  #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .5) +
+  #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .2) +
   geom_line(data = df_chSt, aes(x = t, y = mu), size = 1.5, col = 'green') +
-  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)
   geom_line(data = df_liBa, aes(x = t, y = mu), size = 1.5, col = 'blue') +
   geom_line(data = df, aes(x = t, y = mu), size = 1.5, col = 'black')
-#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)
 
 
 #------------
@@ -381,14 +391,14 @@ df_liBa <- data.frame(t = testTime, mu = pred_liBa$mu, ll= pred_liBa$ll, ul = pr
 
 tree %>% filter(Sp == 'TL') %>% 
   ggplot() + ggtitle('TL') +
-  geom_line(aes(x = Year, y = Height, color = Site, group = id)) +
+  geom_line(aes(x = Year, y = Height, color = Site, group = id), size = 1.5, alpha = .2) +
   geom_line(data = df_bri, aes(x = t, y = mu), size = 1.5, col = 'red') +
-  #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .5) +
+  #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .2) +
   geom_line(data = df_chSt, aes(x = t, y = mu), size = 1.5, col = 'green') +
-  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)
   geom_line(data = df_liBa, aes(x = t, y = mu), size = 1.5, col = 'blue') +
   geom_line(data = df, aes(x = t, y = mu), size = 1.5, col = 'black')
-#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)
 
 
 
@@ -406,11 +416,11 @@ df_liBa <- data.frame(t = testTime, mu = pred_liBa$mu, ll= pred_liBa$ll, ul = pr
 
 tree %>% filter(Sp == 'WS') %>% 
   ggplot() + ggtitle('WS') +
-  geom_line(aes(x = Year, y = Height, color = Site, group = id)) +
+  geom_line(aes(x = Year, y = Height, color = Site, group = id), size = 1.5, alpha = .2) +
   geom_line(data = df_bri, aes(x = t, y = mu), size = 1.5, col = 'red') +
-  #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .5) +
+  #  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .2) +
   geom_line(data = df_chSt, aes(x = t, y = mu), size = 1.5, col = 'green') +
-  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)
   geom_line(data = df_liBa, aes(x = t, y = mu), size = 1.5, col = 'blue') +
   geom_line(data = df, aes(x = t, y = mu), size = 1.5, col = 'black')
-#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)

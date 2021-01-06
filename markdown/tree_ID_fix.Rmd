@@ -1,0 +1,105 @@
+---
+title: "Tree Data Analysis (ID issue fixed)"
+author: "Tahmidul Islam"
+date: "12/16/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, error=FALSE, message = FALSE, cache = FALSE, dpi = 300, fig.width = 14, fig.height = 6)
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(kableExtra)
+library(tidyr)
+```
+# Tree Data
+
+This dataset contains features of trees (height, width, etc.) from 3 sites: Brighton, Chase Stream and Lily Bay. There are 8 species in this sample.
+
+Table: Data overview.
+```{r}
+tree <- read.csv("E:/R Project/BayesFDA/data/tree/tree.csv")
+tree <- tree %>% dplyr::select(Site, ID.Code, Tree, Rep, Sp, Year, Height) %>% 
+  filter(!is.na(Height)) %>% 
+  mutate(id = paste0(Site, ID.Code, Rep, Tree), logHeight = log(Height))
+head(tree) %>% kable()
+```
+
+
+Table: Distribution of site and species.
+```{r}
+sumDf <- tree %>% group_by(Site, Sp, id) %>% summarize (n = n()) %>% dplyr::select(Site, Sp)
+
+sumDf %>% tally() %>% spread(Sp, n) %>% kable()
+```
+
+```{r}
+ggplot(sumDf, aes(x = Site, fill = Sp)) + geom_bar(position="dodge", stat="count")
+```
+
+The measurements are collected few years apart: at 5, 10, 15, 16 and 27 years. 
+```{r}
+sumDf <- tree %>% group_by(Site, Year)  %>%  summarize(n = n())
+sumDf %>% kable()
+```
+
+```{r}
+ggplot(sumDf, aes(x = factor(Year), y = n, fill = Site)) + geom_col(position = 'dodge', stat = 'count')
+```
+
+
+
+```{r}
+ggplot(data = tree, aes(x = Year, y = Height, col = Sp, group = id)) +
+  geom_line(size = 1.5, alpha = .6) + facet_wrap(~Site)
+```
+```{r}
+ggplot(data = tree, aes(x = Year, y = Height, col = Sp, group = id)) +
+  geom_line(size = 1.5, alpha = .6)
+```
+
+## GP model: Site Specific Mean Height Estimation
+
+### Parameter estimates 
+
+```{=latex}
+\begin{table}[ht]
+\centering
+\begin{tabular}{c|cc|cc|cc|c}
+  \hline
+ & \multicolumn{2}{|c|}{Mean} & \multicolumn{2}{|c|}{Subject} & \multicolumn{2}{|c|}{Site} & \\
+ \hline
+ & $l^2$ & $\sigma^2$ & $l^2$ & $\sigma^2$ & $l^2$ & $\sigma^2$ & $\sigma^2$ \\ 
+  \hline
+BS & 0.85 & 3.46 & 1.20 & 0.00 & 0.07 & 0.00 & 0.09 \\ 
+  EL & 2.29 & 9.78 & 0.46 & 0.01 & 0.12 & 0.01 & 0.06 \\ 
+  HL & 1.90 & 5.84 & 0.55 & 0.00 & 1.38 & 0.01 & 0.08 \\ 
+  JL & 0.98 & 2.66 & 0.33 & 0.01 & 0.36 & 0.02 & 0.04 \\ 
+  JP & 3.92 & 11.38 & 0.07 & 0.00 & 18.92 & 0.00 & 0.04 \\ 
+  RP & 1.06 & 4.13 & 0.13 & 0.03 & 4.46 & 0.00 & 0.02 \\ 
+  TL & 1.12 & 3.09 & 1.68 & 0.00 & 0.01 & 0.00 & 0.06 \\ 
+  WS & 0.69 & 2.11 & 0.30 & 0.02 & 0.03 & 0.00 & 0.13 \\ 
+   \hline
+\end{tabular}
+\end{table}
+```
+
+### Plots of site specific estimation
+
+```{r site, echo = FALSE, message=FALSE, fig.align='center', out.width='.9\\linewidth'}
+knitr::include_graphics("../plot/tree/bs_site.pdf")
+knitr::include_graphics("../plot/tree/el_site.pdf")
+knitr::include_graphics("../plot/tree/hl_site.pdf")
+knitr::include_graphics("../plot/tree/jl_site.pdf")
+knitr::include_graphics("../plot/tree/jp_site.pdf")
+knitr::include_graphics("../plot/tree/rp_site.pdf")
+knitr::include_graphics("../plot/tree/tl_site.pdf")
+knitr::include_graphics("../plot/tree/ws_site.pdf")
+```
+
+
+
+

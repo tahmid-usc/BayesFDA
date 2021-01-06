@@ -24,8 +24,9 @@ This dataset contains features of trees (height, width, etc.) from 3 sites: Brig
 Table: Data overview.
 ```{r}
 tree <- read.csv("E:/R Project/BayesFDA/data/tree/tree.csv")
-tree <- tree %>% dplyr::select(Site, Tree, Rep, Sp, Year, Height) %>% filter(!is.na(Height)) %>% 
-mutate(id = paste0(Tree, Rep))
+tree <- tree %>% dplyr::select(Site, ID.Code, Tree, Rep, Sp, Year, Height) %>% 
+  filter(!is.na(Height)) %>% 
+  mutate(id = paste0(Site, ID.Code, Rep), logHeight = log(Height))
 head(tree) %>% kable()
 ```
 
@@ -46,86 +47,19 @@ The measurements are collected few years apart: at 5, 10, 15, 16 and 27 years.
 sumDf <- tree %>% group_by(Site, Year)  %>%  summarize(n = n())
 sumDf %>% kable()
 ```
-```{r}
-ggplot(sumDf, aes(x = factor(Year), fill = Site)) + geom_bar(position = 'dodge', stat = 'count')
-```
-
-There is height measurement for years after 10 in Brighton and year after 15 in Lily Bay. 
 
 ```{r}
-ggplot(data = tree, aes(x = Year, y = Height, col = Sp, group = id)) +
-  geom_line(size = 1.5) + facet_wrap(~Site)
+ggplot(sumDf, aes(x = factor(Year), y = n, fill = Site)) + geom_col(position = 'dodge', stat = 'count')
 ```
+
+
+
 ```{r}
 ggplot(data = tree, aes(x = Year, y = Height, col = Sp, group = id)) +
-  geom_line(size = 1.5)
+  geom_line(size = 1.5, alpha = .1) + facet_wrap(~Site)
 ```
-
-
-## GP Model for Tree Height
-
-Assuming the tree heights for each of the species as a function over time, we analyze the data in functional data analysis approach. For each species, we combine data from all three sites and model the mean functions of the tree heights. We have combined the variables `Tree` and `Rep` to create an `id` variable. Gaussian kernel has been for the estimation.
-
-```{r bs, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species: BS', out.width='\\linewidth', fig.pos='h'}
-knitr::include_graphics("../plot/tree/BS.pdf")
+```{r}
+ggplot(data = tree, aes(x = Year, y = Height, col = Sp, group = id)) +
+  geom_line(size = 1.5, alpha = .1)
 ```
-
-
-```{r el, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : EL', out.width='\\linewidth', fig.pos='H'}
-knitr::include_graphics("../plot/tree/EL.pdf")
-```
-
-```{r hl, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : HL', out.width='\\linewidth', fig.pos='H'}
-knitr::include_graphics("../plot/tree/HL.pdf")
-```
-
-```{r jl, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : JL', out.width='\\linewidth', fig.pos='H'}
-knitr::include_graphics("../plot/tree/JL.pdf")
-```
-
-```{r jp, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : JP', out.width='\\linewidth', fig.pos='H'}
-knitr::include_graphics("../plot/tree/JP.pdf")
-```
-
-```{r rp, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : RP', out.width='\\linewidth', fig.pos='H'}
-knitr::include_graphics("../plot/tree/RP.pdf")
-```
-
-```{r tl, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : TL', out.width='\\linewidth', fig.pos='H'}
-knitr::include_graphics("../plot/tree/TL.pdf")
-```
-
-```{r ws, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species : WS', out.width='\\linewidth', fig.pos='H'}
-knitr::include_graphics("../plot/tree/WS.pdf")
-```
-
-## Site Specific Mean Height Estimation
-
-We attempt to estimate the mean function for each of the species by the sites. The black curve denotes the overall mean function where the red, green and blue curves represent the site specific mean functions for the sites Brighton, Chase Stream and Lili Bay respectively. 
-We observe some features in the tree data as well as some issues with the model fit. For example, we have found no site specific variation for the species BS, all the site specific curves coincide with the overall mean curve. It suggest there is no site specific effect for the species BS.
-
-```{r bssite, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species: BS', out.width='\\linewidth', fig.pos='H'}
-knitr::include_graphics("../plot/tree/bs_site.pdf")
-knitr::include_graphics("../plot/tree/rp_site.pdf")
-knitr::include_graphics("../plot/tree/ws_site.pdf")
-```
-
-For EL and HL, we observev a nice separation of the site effects.
-```{r elhl, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species: EL', out.width='\\linewidth', fig.pos='H'}
-knitr::include_graphics("../plot/tree/el_site.pdf")
-knitr::include_graphics("../plot/tree/hl_site.pdf")
-```
-
-
-For species JL and TL, it appears that the overall model fit was not right in the first place. I am rerunning the optimization and model fit to check it.
-```{r jltl, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species: JL', out.width='\\linewidth', fig.pos='H'}
-knitr::include_graphics("../plot/tree/jl_site.pdf")
-knitr::include_graphics("../plot/tree/tl_site.pdf")
-```
-
-Also for JP, it appears that there are some issues with site specific fit for Brighton and Chase Stream.
-```{r jpsite, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Species: JP', out.width='\\linewidth', fig.pos='H'}
-knitr::include_graphics("../plot/tree/jp_site.pdf")
-```
-
 

@@ -5,8 +5,8 @@ library(ggplot2)
 
 
 tree <- read.csv("E:/R Project/BayesFDA/data/tree/tree.csv")
-tree <- tree %>% dplyr::select(Site, Tree, Rep, Sp, Year, Height) %>% filter(!is.na(Height)) %>% 
-  mutate(id = paste0(Tree, Rep), logHeight = log(Height))
+tree <- tree %>% dplyr::select(Site, ID.Code, Tree, Rep, Sp, Year, Height) %>% filter(!is.na(Height)) %>% 
+  mutate(id = paste0(Site, ID.Code, Rep), logHeight = log(Height))
 View(tree)
 
 summary(tree)
@@ -17,12 +17,12 @@ table(tree$Site, tree$Sp, dnn = c('Site', 'Species'))
 
 tree %>% group_by(id) %>% summarize(n())
 
-ggplot(data = tree, aes(x = Year, y = logHeight, col = Sp, group = id)) +
-  geom_line(size = 1.5) + facet_wrap(~Site)
+ggplot(data = tree, aes(x = Year, y = Height, col = Sp, group = id)) +
+  geom_line(size = 1.5, alpha = .2) + facet_wrap(~Site)
 
 
-ggplot(data = tree, aes(x = Year, y = logHeight, col = Sp, group = id)) +
-  geom_line(size = 1.5) 
+ggplot(data = tree, aes(x = Year, y = Height, col = Sp, group = id)) +
+  geom_line(size = 1.5, alpha = .5) 
 
 #split data on species
 

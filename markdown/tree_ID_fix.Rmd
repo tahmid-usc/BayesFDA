@@ -54,11 +54,11 @@ ggplot(sumDf, aes(x = factor(Year), y = n, fill = Site)) + geom_col(position = '
 
 ```{r}
 ggplot(data = tree, aes(x = Year, y = Height, col = Sp, group = id)) +
-  geom_line(size = 1.5, alpha = .6) + facet_wrap(~Site)
+  geom_line(size = 1.5, alpha = .1) + facet_wrap(~Site)
 ```
 ```{r}
 ggplot(data = tree, aes(x = Year, y = Height, col = Sp, group = id)) +
-  geom_line(size = 1.5, alpha = .6)
+  geom_line(size = 1.5, alpha = .1)
 ```
 
 ## GP model: Site Specific Mean Height Estimation
@@ -74,14 +74,14 @@ ggplot(data = tree, aes(x = Year, y = Height, col = Sp, group = id)) +
  \hline
  & $l^2$ & $\sigma^2$ & $l^2$ & $\sigma^2$ & $l^2$ & $\sigma^2$ & $\sigma^2$ \\ 
   \hline
-BS & 0.85 & 3.46 & 1.20 & 0.00 & 0.07 & 0.00 & 0.09 \\ 
-  EL & 2.29 & 9.78 & 0.46 & 0.01 & 0.12 & 0.01 & 0.06 \\ 
-  HL & 1.90 & 5.84 & 0.55 & 0.00 & 1.38 & 0.01 & 0.08 \\ 
-  JL & 0.98 & 2.66 & 0.33 & 0.01 & 0.36 & 0.02 & 0.04 \\ 
-  JP & 3.92 & 11.38 & 0.07 & 0.00 & 18.92 & 0.00 & 0.04 \\ 
-  RP & 1.06 & 4.13 & 0.13 & 0.03 & 4.46 & 0.00 & 0.02 \\ 
-  TL & 1.12 & 3.09 & 1.68 & 0.00 & 0.01 & 0.00 & 0.06 \\ 
-  WS & 0.69 & 2.11 & 0.30 & 0.02 & 0.03 & 0.00 & 0.13 \\ 
+BS & 0.69 & 1.79 & 0.17 & 0.06 & 0.14 & 0.00 & 0.03 \\ 
+  EL & 1.06 & 4.80 & 0.20 & 0.05 & 0.08 & 0.01 & 0.02 \\ 
+  HL & 2.09 & 5.96 & 0.27 & 0.07 & 11.55 & 0.01 & 0.02 \\ 
+  JL & 1.69 & 12.24 & 0.21 & 0.03 & 0.19 & 0.02 & 0.01 \\ 
+  JP & 4.36 & 14.42 & 0.18 & 0.02 & 0.10 & 0.01 & 0.02 \\ 
+  RP & 0.86 & 2.50 & 0.16 & 0.05 & 0.01 & 0.00 & 0.01 \\ 
+  TL & 0.28 & 1.60 & 0.20 & 0.04 & 0.01 & 0.00 & 0.02 \\ 
+  WS & 0.67 & 2.08 & 0.20 & 0.16 & 24.91 & 0.00 & 0.01 \\ 
    \hline
 \end{tabular}
 \end{table}
@@ -101,5 +101,55 @@ knitr::include_graphics("../plot/tree/ws_site.pdf")
 ```
 
 
+# Classification
 
+We further predict the tree species based on their growth (height) over time. The classification result is summarized in the following table in terms of a confusion matrix. The overall accuracy for prediciting the tree species is 46.14% which is not very high. The table also shows the percentage of trees correctly classified given the species. It appears that TL trees are classified best (71% classified as TL) whereas the larches are somewhat difficult to classify (EL: 27%, JL: 24%). However, interestingly the trees are 
+
+```{=latex}
+\begin{table}[ht]
+\small
+\centering
+\caption{Confusion matrix for predicting tree species. The percentages in the braces give the accuracy of predicting the species given a species.}
+\begin{tabular}{cccccccccc} 
+\toprule
+     & \multicolumn{8}{c}{Predicted}                 & Total  \\
+True & BS & EL & HL & JL & JP & RP & TL & WS  &        \\
+  BS & 149 (54.38)&   0 &   0 &   0 &  19 &  11 &   0 &  95 &  274 \\ 
+  EL &  15 & 258 (27.27) & 377 & 156 &   9 &   8 & 105 &  18 &  946 \\ 
+  HL &   7 &  37 & 190 (66.20) &  17 &   6 &   3 &  24 &   3 &  287 \\ 
+  JL &   2 & 149 & 118 & 116 (24.47) &   4 &  13 &  63 &   9 &  474 \\ 
+  JP &  43 &   0 &   0 &   4 & 160 (55.56)&  25 &  40 &  16 &  288 \\ 
+  RP &  28 &   0 &   0 &   7 &  66 & 138 (46.00)&   4 &  57 &  300 \\ 
+  TL &  15 &  23 &   7 &  40 &  41 &  12 & 379 (71.11)&  16 &  533 \\ 
+  WS &  67 &   0 &   0 &   0 &  11 &  45 &   0 & 182 (59.67)&  305 \\ 
+\bottomrule
+\end{tabular}
+\end{table}
+```
+
+
+We can aggregate the prediction results to compute the accuracy when trying to predict a tree's genus rather than the species. In this case, the overall accuracy jumps to 86.32%. Therefore, our model performs much better at predicting a tree's genus than the exact species.
+
+
+```{=latex}
+\begin{table}[ht]
+\centering
+\caption{Confusion matrix for predicting tree genus The percentages in the braces give the accuracy of predicting the genus given a species.}
+\begin{tabular}{cccccccccc} 
+\toprule
+     & \multicolumn{3}{c}{Predicted} & Total  \\
+    True & Spruce  & Larch  & Pine  &        \\
+  BS & 244 (89.05\%) &  0   &  30 &   274 \\ 
+  EL &  33 &  896 (94.71\%) &  17 &  946 \\ 
+  HL &  10 &  268 (93.38\%) &  9  &  287 \\ 
+  JL &  11 &  446 (94.09\%) &  17 &  474 \\ 
+  JP &  59 &  44  & 185 (64.24\%) &  288 \\ 
+  RP &  85 &  11  & 204 (68.00\%) &  300 \\ 
+  TL &  31 &  449 (84.24\%) & 53  &  533 \\ 
+  WS &  249 (81.64\%) &   0 & 56  &  305 \\ 
+
+\bottomrule
+\end{tabular}
+\end{table}
+```
 

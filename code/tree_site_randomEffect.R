@@ -8,6 +8,7 @@ library(Matrix)
 library(optimx)
 library(readxl)
 library(tidyverse)
+library(xtable)
 
 # RBF kernel
 
@@ -196,6 +197,18 @@ postDist_site <- function(x, train, site) {
 
 
 
+# plot fitted mean function
+
+plotGP <- function(gp, postDist, ...) {
+  x <- gp$trainx * gp$xmax
+  y <- gp$ymean + (gp$ysd * gp$trainy)
+  plotFdata(gp$id, x, y, ...)
+  polygon(c(postDist$xstar,rev(postDist$xstar)), c(postDist$ll,rev(postDist$ul)), 
+          col= rgb(.2,0,0,.5),border=NA)
+  lines(postDist$xstar, postDist$mu, lwd = 4, col = 2)
+}
+
+
 #----------------
 
 tree <- read.csv("E:/R Project/BayesFDA/data/tree/tree.csv")
@@ -225,7 +238,7 @@ plotGP(gp_Sp$RP, postDist_Sp$RP, trans = .05)
 plotGP(gp_Sp$TL, postDist_Sp$TL, trans = .05)
 plotGP(gp_Sp$WS, postDist_Sp$WS, trans = .05)
 
-library(xtable)
+
 t(sapply(gp_Sp, function(l) {l$hyper})) %>% xtable()
 
 #------------- Site specific for all sites
@@ -246,12 +259,13 @@ tree %>% filter(Sp == 'BS') %>%
   geom_line(aes(x = Year, y = Height, color = Site, group = id), size = 1.5, 
             alpha = .2) +
   geom_line(data = df_bri, aes(x = t, y = mu), size = 1.5, col = 'red') +
-#  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .5) +
+#  geom_ribbon(data = df_bri, aes(x = t, ymin = ll, ymax = ul), alpha = .2, fill = 'red') +
   geom_line(data = df_chSt, aes(x = t, y = mu), size = 1.5, col = 'green') +
-#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+#  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2, fill = 'green') +
   geom_line(data = df_liBa, aes(x = t, y = mu), size = 1.5, col = 'blue') +
-  geom_line(data = df, aes(x = t, y = mu), size = 1.5, col = 'black')
-  #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .5)
+#  geom_ribbon(data = df_liBa, aes(x = t, ymin = ll, ymax = ul), alpha = .2, fill = 'blue') +
+  geom_line(data = df, aes(x = t, y = mu), size = 1.5, col = 'black') 
+  
   
 #-------------------
 
@@ -424,3 +438,15 @@ tree %>% filter(Sp == 'WS') %>%
   geom_line(data = df_liBa, aes(x = t, y = mu), size = 1.5, col = 'blue') +
   geom_line(data = df, aes(x = t, y = mu), size = 1.5, col = 'black')
 #  geom_ribbon(data = df_chSt, aes(x = t, ymin = ll, ymax = ul), alpha = .2)
+
+
+
+#--- confusion matrix
+
+pred <- unlist(lapply(classification_result, names))
+
+len <- unlist(lapply(classification_result, length))
+
+true <- rep(names(len), len)
+
+table(true, pred)

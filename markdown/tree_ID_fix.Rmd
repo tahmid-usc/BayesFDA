@@ -21,7 +21,9 @@ This dataset contains features of trees (height, width, etc.) from 3 sites: Brig
 
 Table: Data overview.
 ```{r}
-tree <- read.csv("E:/R Project/BayesFDA/data/tree/tree.csv")
+tree <- read.csv("E:/R Project/BayesFDA/data/tree/tree.csv") 
+head(tree) %>% kable()
+glimpse(tree)
 tree <- tree %>% dplyr::select(Site, ID.Code, Tree, Rep, Sp, Year, Height) %>% 
   filter(!is.na(Height)) %>% 
   mutate(id = paste0(Site, ID.Code, Rep, Tree), logHeight = log(Height))

@@ -82,9 +82,70 @@ legend('bottomright', c('Male', 'Female'), lty = 1, lwd = 3, bty = 'n',
        col = c(2,1))
 
 
-#subject specific
+
+##
+
+postdf.fem <- data.frame(t = testTime, mu = postDist.female$mu, ul = postDist.female$ul, ll = postDist.female$ll)
+postdf.m <- data.frame(t = testTime, mu = postDist.male$mu, ul = postDist.male$ul, ll = postDist.male$ll)
+
+bone %>% mutate(sex = ifelse(sex == 'fem', 'Female', 'Male')) %>% ggplot() + 
+  labs(x = "Age", y = "Spinal bone mineral density", color = "Sex")+ 
+  geom_line(aes(x = age, y = spnbmd, col = sex, group = idnum)) +
+  geom_ribbon(data = postdf.m, aes(x = t, ymin = ll, ymax = ul), alpha = .2, fill = 5) +
+  geom_ribbon(data = postdf.fem, aes(x = t, ymin = ll, ymax = ul), alpha = .2, fill = 2) +
+  geom_line(data = postdf.fem, aes(x = t, y = mu), size = 1.5, col = 2) +
+  geom_line(data = postdf.m, aes(x = t, y = mu), size = 1.5, col = 5) 
+  
+
+
+#subject specific and plots
 
 sub_mu <- postDist_sub(testTime, gpFit.male, sub_id = 1)  
+
+
+# generate all subject specific
+#male
+sub_mu_all <- c()
+for(i in unique(train$mal$idnum)) {
+  sub_mu_all <- cbind(sub_mu_all, postDist_sub(testTime, gpFit.male, sub_id = i)$mu)
+}
+sub_mu_all <- sub_mu_all %>% data.frame() %>% mutate(t = testTime)
+
+matplot(testTime, sub_mu_all[,-128], type = 'l')
+lines(testTime, postdf.m$mu, lwd = 4)
+
+# ggplot
+postdf <- data.frame(t = testTime, mu = sub_mu$mu, ul = sub_mu$ul, ll = sub_mu$ll)
+
+train$mal %>% filter(idnum == unique(idnum)[1]) %>% ggplot() + 
+  labs(x = NULL, y = NULL) + 
+  geom_line(aes(x = age, y = spnbmd), size = 1.5, col = 2) +
+  geom_line(data = sub_mu_all, aes(x = t, y = X1), size = 2, col = 2) + 
+  geom_line(data = train$mal, aes(x = age, y = spnbmd, group = idnum), alpha = .5) 
+
+
+  
+#female
+
+sub_mu_all <- c()
+for(i in unique(train$fem$idnum)) {
+  sub_mu_all <- cbind(sub_mu_all, postDist_sub(testTime, gpFit.female, sub_id = i)$mu)
+}
+sub_mu_all <- sub_mu_all %>% data.frame() %>% mutate(t = testTime)
+
+matplot(testTime, sub_mu_all[,-154], type = 'l')
+lines(testTime, postdf.fem$mu, lwd = 4)
+
+# ggplot
+postdf <- data.frame(t = testTime, mu = sub_mu$mu, ul = sub_mu$ul, ll = sub_mu$ll)
+
+train$fem %>% filter(idnum == unique(idnum)[2]) %>% ggplot() + 
+  labs(x = NULL, y = NULL) + 
+  geom_line(aes(x = age, y = spnbmd), size = 1.5, col = 2) +
+  geom_line(data = sub_mu_all, aes(x = t, y = X2), size = 2, col = 2) + 
+  geom_line(data = train$fem, aes(x = age, y = spnbmd, group = idnum), alpha = .5) 
+
+
 
 
 #plot
